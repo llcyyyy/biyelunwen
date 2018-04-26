@@ -20,7 +20,7 @@ import os
 #     with open(name +'.pkl', 'wb') as f:
 #         pickle.dump(dict, f, pickle.HIGHEST_PROTOCOL)
 
-X_all = np.empty(shape = (0, 3), dtype=np.float32)
+X_all = np.empty(shape = (0, 4), dtype=np.float32)
 y_all = np.empty(shape = (0, 2), dtype=np.float32)
 os.chdir('E:\position transformation\position transformation')
 track_list = glob.glob('*.pkl')
@@ -29,7 +29,7 @@ for name in track_list:
         data = pickle.load(f, encoding='latin1')
         # bm = 0.5 * (data['yolo_box'][:, 0] + data['yolo_box'][:, 1])
         # xa = np.stack([bm, data['yolo_box'][:, 2]],axis=1)
-        X_all = np.concatenate((X_all, data['yolo_box'][:, :3].astype(np.float32)))
+        X_all = np.concatenate((X_all, data['yolo_box'][:, :4].astype(np.float32)))
         y_all = np.concatenate((y_all, data['real_position'][:, :2].astype(np.float32)))
 X_train = X_all[:int(0.75 * X_all.shape[0]), :]
 y_train = y_all[:int(0.75 * X_all.shape[0]), :]
@@ -39,3 +39,10 @@ y_valid = y_all[int(0.75 * X_all.shape[0]):, :]
 plt.figure()
 plt.plot(y_all[:, 0], y_all[:, 1], 'bo', markersize=1)
 plt.show()
+
+from sklearn.utils import shuffle
+dict = {}
+dict['yolo_box'], dict['real_position'] = shuffle(X_all, y_all)
+
+with open('shuffled_data.pkl', 'wb') as f:
+    pickle.dump(dict, f, pickle.HIGHEST_PROTOCOL)
